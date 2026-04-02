@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficGuard — Officer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style1.css">
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script1.js" defer></script>
+  </head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">🛡 TrafficGuard</div>
+    <div class="logo-sub">Police Operations Portal</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Operations</div>
+    <a class="nav-item active" onclick="showSection('violations', this)">
+      <span class="icon">⚠</span> Violations
+      <span class="nav-badge" id="pending-count">0</span>
+    </a>
+    <a class="nav-item" onclick="showSection('risk', this)">
+      <span class="icon">📊</span> Risk Scores
+    </a>
+    <div class="nav-section">Reports</div>
+    <a class="nav-item" onclick="downloadReport()">
+      <span class="icon">📄</span> Download Report
+    </a>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="user-initials">OF</div>
+    <div class="user-info">
+      <div class="user-name" id="user-name">Officer</div>
+      <div class="user-role" id="user-role">Traffic Officer</div>
+    </div>
+    <button class="logout-btn" onclick="logout()" title="Logout">↩</button>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <span class="page-title" id="page-title-text">Violation Review Queue</span>
+    <div class="topbar-right">
+      <!-- ALERTS BUTTON — shown only when high risk drivers exist -->
+      <button class="alerts-btn" id="alerts-btn" onclick="openAlertsModal()">
+        ⚠ ALERTS <span class="alerts-count" id="alerts-count">0</span>
+      </button>
+      <span class="topbar-time" id="clock"></span>
+      <span class="status-dot">Live</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stat-grid">
+      <div class="stat-card gold"><div class="stat-icon">⚠️</div><div class="stat-val" id="s-total">—</div><div class="stat-label">Total Violations</div></div>
+      <div class="stat-card red"><div class="stat-icon">⏳</div><div class="stat-val" id="s-pending">—</div><div class="stat-label">Pending Approval</div></div>
+      <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-val" id="s-approved">—</div><div class="stat-label">Approved</div></div>
+      <div class="stat-card steel"><div class="stat-icon">₹</div><div class="stat-val" id="s-fines">—</div><div class="stat-label">Fines Issued (₹)</div></div>
+    </div>
+
+    <!-- Violations Section -->
+    <div id="violations-section">
+      <div class="section-header">
+        <span class="section-title">Violation Records</span>
+        <div class="filter-row">
+          <input class="search-input" type="text" placeholder="🔍 Search plate..." oninput="filterTable(this.value)">
+          <button class="filter-btn active" onclick="filterStatus('all', this)">All</button>
+          <button class="filter-btn" onclick="filterStatus('pending', this)">Pending</button>
+          <button class="filter-btn" onclick="filterStatus('approved', this)">Approved</button>
+          <button class="btn-report" onclick="downloadReport()">⬇ PDF Report</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Plate No.</th><th>Driver</th><th>Violation</th><th>Evidence</th>
+              <th>Fine (₹)</th><th>Date / Time</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="violations-tbody">
+            <tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div> Loading from Supabase...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Risk Section -->
+    <div id="risk-section" style="display:none;">
+      <div class="section-header">
+        <span class="section-title">Driver Risk Scores</span>
+        <div class="filter-row">
+          <button class="filter-btn active" onclick="filterRisk('all', this)">All</button>
+          <button class="filter-btn" onclick="filterRisk('High', this)">High Risk</button>
+          <button class="filter-btn" onclick="filterRisk('Medium', this)">Medium</button>
+          <button class="filter-btn" onclick="filterRisk('Low', this)">Low</button>
+        </div>
+      </div>
+      <div class="risk-grid" id="risk-grid">
+        <div style="grid-column:1/-1"><div class="loading-overlay"><div class="spinner"></div> Loading risk data...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Violation Detail Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 class="modal-title" id="modal-title">Violation Detail</h3>
+    <p class="modal-sub" id="modal-sub">Review evidence before approving</p>
+    <div class="modal-img-placeholder">📷 CCTV Frame — <span id="modal-plate-img"></span></div>
+    <div id="modal-rows"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- Alerts Modal — High Risk Drivers List -->
+<div class="modal-overlay" id="alerts-modal-overlay">
+  <div class="modal" style="width:600px; max-width:95vw; border-color:rgba(192,86,74,0.4);">
+    <button class="modal-close" onclick="closeAlertsModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:44px;height:44px;background:rgba(192,86,74,0.2);border:1px solid rgba(192,86,74,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚠️</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:3px;">High Risk Drivers Detected</div>
+        <div style="font-size:15px;font-weight:600;">Active Alerts — Immediate Attention Required</div>
+      </div>
+    </div>
+    <div id="alerts-list"></div>
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button onclick="closeAlertsModal()" style="flex:1;padding:11px;background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid rgba(255,255,255,0.1);border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all 0.15s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">Close Alerts</button>
+    </div>
+  </div>
+</div>
+
+<!-- High Risk Warning Modal (single driver) -->
+<div class="modal-overlay" id="warning-modal-overlay">
+  <div class="modal" style="border-color:rgba(192,86,74,0.4); max-width:480px;">
+    <button class="modal-close" onclick="closeWarningModal()">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div style="width:48px;height:48px;background:rgba(192,86,74,0.2);border:1px solid rgba(192,86,74,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚠️</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--red);margin-bottom:3px;">High Risk Driver Detected</div>
+        <div class="modal-title" id="warn-driver-name" style="margin:0;font-size:16px;">—</div>
+      </div>
+    </div>
+    <div style="background:rgba(192,86,74,0.1);border:1px solid rgba(192,86,74,0.25);border-radius:6px;padding:14px 16px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:12px;color:var(--muted);">Risk Score</span>
+        <span id="warn-score" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red);letter-spacing:0.05em;">—</span>
+      </div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+        <div id="warn-bar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#C0564A,#E07070);transition:width 0.8s ease;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--muted);"><span>Low (0)</span><span>Medium (6)</span><span>High (16+)</span></div>
+    </div>
+    <div id="warn-details" style="margin-bottom:16px;"></div>
+    <div style="background:rgba(255,197,112,0.08);border:1px solid rgba(255,197,112,0.2);border-radius:6px;padding:12px 14px;margin-bottom:20px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">📱 In-Platform Warning Message</div>
+      <div id="warn-msg" style="font-size:12px;color:var(--sand);line-height:1.6;"></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeWarningModal()" style="flex:1;padding:11px;background:rgba(192,86,74,0.2);color:var(--red);border:1px solid rgba(192,86,74,0.35);border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:background 0.15s;">Acknowledge</button>
+      <button onclick="closeWarningModal()" style="flex:1;padding:11px;background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid rgba(255,255,255,0.1);border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</body>
+</html>

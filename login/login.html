@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrafficGuard — Police Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="style.css">
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="grid-lines"></div>
+
+<div class="page-wrap">
+  <div class="left-panel">
+    <div class="badge">Tamil Nadu Police</div>
+    <h1 class="hero-title">TRAFFIC<br><span>GUARD</span><br>SYSTEM</h1>
+    <p class="hero-desc">AI-powered traffic violation detection and driver behavioral analytics for law enforcement officers.</p>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-num">4</span>
+        <span class="stat-label">Violation Types</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">98%</span>
+        <span class="stat-label">Detection Rate</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">24/7</span>
+        <span class="stat-label">Monitoring</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <div class="shield-icon">🛡</div>
+    <h2 class="login-title">Officer Login</h2>
+    <p class="login-sub">Authorized personnel only. All access is logged.</p>
+
+    <div class="field-group">
+      <label class="field-label">Badge ID / Email</label>
+      <input class="field-input" id="email" type="email" placeholder="officer@tnpolice.gov.in">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Password</label>
+      <input class="field-input" id="password" type="password" placeholder="••••••••">
+    </div>
+    <div class="forgot">
+      <a onclick="openForgotModal()">Forgot credentials?</a>
+    </div>
+    <div class="error-msg" id="error-msg">Invalid credentials. Please try again.</div>
+    <button class="btn-login" id="login-btn" onclick="handleLogin()">Access Portal →</button>
+    <div class="divider"><span>secure connection</span></div>
+    <div class="security-note">
+      <span>🔒</span>
+      <span>256-bit encrypted · Session expires in 8 hours · Powered by Supabase Auth</span>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeForgotModal()">✕</button>
+    <h3 class="modal-title">🔑 Reset Credentials</h3>
+    <p class="modal-sub">Enter your registered email address. We'll send you a password reset link via Supabase Auth.</p>
+    <div class="field-group">
+      <label class="field-label">Email Address</label>
+      <input class="field-input" id="reset-email" type="email" placeholder="officer@tnpolice.gov.in">
+    </div>
+    <div class="error-msg" id="reset-error">Please enter a valid email.</div>
+    <button class="btn-reset" onclick="sendResetEmail()">Send Reset Link →</button>
+    <div class="reset-success" id="reset-success">
+      ✅ Reset link sent! Check your email inbox. The link expires in 1 hour.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

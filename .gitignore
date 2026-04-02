@@ -1,0 +1,7 @@
+.history/
+.env
+venv/
+*.pkl
+__pycache__/
+.vscode/
+*.pyc

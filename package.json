@@ -1,0 +1,18 @@
+{
+  "name": "traffic_violation",
+  "version": "1.0.0",
+  "description": "```\r traffic-violation-system/\r ├── dashboard/                   # Frontend HTML/CSS (Police UI)\r │   ├── login.html               # Officer login page\r │   └── officer.html             # Main dashboard (violations + risk scores)\r │\r ├── api-server/                  # Node.js REST API (Port 5000)\r │   ├── server.js                # Main server (vanilla http module)\r │   ├── .env.example             # Environment variable template\r │   └── package.json             # (you'll create this)\r │\r ├── plate-service/               # Python services\r │   ├── app.py                   # Plate detection API (Port 8000, OpenCV + EasyOCR)\r │   └── risk_model.py            # ML risk prediction (Port 8001, scikit-learn)\r │\r └── database/\r     └── schema.sql               # Full Supabase PostgreSQL schema\r ```",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
+    "dotenv": "^17.3.1"
+  }
+}
