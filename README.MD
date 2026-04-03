@@ -1,12 +1,10 @@
----
-
 # 🛡 TrafficGuard
 
 ### AI Traffic Violation & Driver Analytics System
 
 > AI-powered traffic enforcement platform combining computer vision, machine learning risk scoring, and a real-time officer dashboard.
 
----
+
 
 ## 📁 Project Structure
 
@@ -40,7 +38,7 @@ traffic-violation-system/
 
 ---
 
-## 🔄 System Flow
+##  System Flow
 
 ```
 CCTV Feed (Simulated)
@@ -58,7 +56,7 @@ ML model updates risk score → dashboard updated
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 | Layer           | Tech                    |
 | --------------- | ----------------------- |
