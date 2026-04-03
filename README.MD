@@ -1,34 +1,36 @@
-````markdown
-# 🛡 TrafficGuard — AI Traffic Violation & Driver Analytics System
+---
 
-> AI-powered traffic enforcement platform combining computer vision,
-> machine learning risk scoring, and a real-time officer dashboard.
+# 🛡 TrafficGuard
+
+### AI Traffic Violation & Driver Analytics System
+
+> AI-powered traffic enforcement platform combining computer vision, machine learning risk scoring, and a real-time officer dashboard.
 
 ---
 
 ## 📁 Project Structure
 
-```
+```bash
 traffic-violation-system/
-├── login/                        # Officer login portal
+├── login/
 │   ├── login.html
 │   ├── style.css
 │   └── script.js
 │
-├── officer/                      # Officer dashboard
+├── officer/
 │   ├── officer.html
 │   ├── style1.css
 │   └── script1.js
 │
-├── api-server/                   # Node.js REST API (Port 5000)
+├── api-server/
 │   ├── server.js
 │   ├── .env
 │   └── package.json
 │
-├── plate-service/                # Python CV + ML services
-│   ├── app.py                    # Plate detection (Port 8000)
-│   ├── risk_model.py             # Risk scoring API (Port 8001)
-│   ├── riskmodel.py              # Model training script
+├── plate-service/
+│   ├── app.py
+│   ├── risk_model.py
+│   ├── riskmodel.py
 │   ├── risk_model.pkl
 │   └── score_model.pkl
 │
@@ -47,42 +49,39 @@ OpenCV + EasyOCR — plate detection + violation classification
         ↓
 Auto-insert into Supabase (vehicles + violation_records)
         ↓
-Officer logs in → reviews evidence → approves / rejects
+Officer logs in → reviews → approves / rejects
         ↓
-Fine generated → SMS sent to owner → payment tracked
+Fine generated → SMS sent → payment tracked
         ↓
-ML model recalculates risk score → dashboard updated
+ML model updates risk score → dashboard updated
 ```
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer           | Tech                                   |
-| --------------- | -------------------------------------- |
-| Frontend        | HTML, CSS, Vanilla JS                  |
-| Auth + Database | Supabase (PostgreSQL)                  |
-| API Server      | Node.js                                |
-| Computer Vision | Python, OpenCV, EasyOCR                |
-| ML Risk Model   | scikit-learn (trained on Google Colab) |
-| SMS             | Twilio (simulated in dev)              |
+| Layer           | Tech                    |
+| --------------- | ----------------------- |
+| Frontend        | HTML, CSS, Vanilla JS   |
+| Auth + Database | Supabase (PostgreSQL)   |
+| API Server      | Node.js                 |
+| Computer Vision | Python, OpenCV, EasyOCR |
+| ML Risk Model   | scikit-learn            |
+| SMS             | Twilio (simulated)      |
 
 ---
 
 ## 🗄️ Database
 
-7 tables managed via Supabase:
-`vehicles` · `violations_master` · `violation_records` · `payments` · `sms_logs` · `risk_predictions` · `user_roles`
+7 tables:
 
-Run `database/schema.sql` in the Supabase SQL editor to set up all tables.
+`vehicles` · `violations_master` · `violation_records` · `payments` · `sms_logs` · `risk_predictions` · `user_roles`
 
 ---
 
-## 🎥 Computer Vision (`plate-service/app.py`)
+## 🎥 Computer Vision
 
-Accepts simulated CCTV frames → extracts plate via EasyOCR → classifies violation → auto-inserts into Supabase.
-
-**Violations detected:**
+`plate-service/app.py` (Port 8000)
 
 | Violation      | Severity | Fine   |
 | -------------- | -------- | ------ |
@@ -93,76 +92,64 @@ Accepts simulated CCTV frames → extracts plate via EasyOCR → classifies viol
 
 ---
 
-## 🤖 Risk Model (`plate-service/risk_model.py`)
-
-Trained via Google Colab → downloaded as `.pkl` → runs as Flask API on Port 8001. Called automatically after every approval.
+## 🤖 Risk Model
 
 ```
-risk_score = Σ(severity per violation) + (total_violations × 2)
-
-0–5   → Low    6–15  → Medium    16+  → High (auto SMS warning)
+risk_score = Σ(severity) + (total_violations × 2)
 ```
 
----
-
-## 🖥️ API Server (`api-server/server.js`)
-
-Handles business logic between frontend and Supabase.
-
-| Method | Route                | Description                        |
-| ------ | -------------------- | ---------------------------------- |
-| GET    | `/health`            | Health check                       |
-| GET    | `/violations`        | List violations                    |
-| POST   | `/approve-violation` | Approve + fine + SMS + risk update |
-| POST   | `/reject-violation`  | Reject violation                   |
-| POST   | `/create-violation`  | Insert new violation               |
-| POST   | `/send-warning`      | Manual SMS trigger                 |
+| Range | Level  |
+| ----- | ------ |
+| 0–5   | Low    |
+| 6–15  | Medium |
+| 16+   | High   |
 
 ---
 
-## 🖥️ Frontend
+## 🖥 API Server
 
-**Login** — Supabase Auth → role check → redirects officer to dashboard or admin panel.
-
-**Officer Dashboard** — two tabs:
-
-- **Violations** — live table, filter by status, one-click approve/reject, evidence modal
-- **Risk Scores** — cards per driver, high risk triggers pulsing ⚠ alert + warning modal
+| Method | Route              | Description                        |
+| ------ | ------------------ | ---------------------------------- |
+| GET    | /health            | Health check                       |
+| GET    | /violations        | List violations                    |
+| POST   | /approve-violation | Approve + fine + SMS + risk update |
+| POST   | /reject-violation  | Reject violation                   |
+| POST   | /create-violation  | Insert violation                   |
+| POST   | /send-warning      | Manual SMS                         |
 
 ---
 
-## 🚀 Running the Full System
+## 🖥 Frontend
+
+* Login → Supabase Auth
+* Dashboard → Approve / Reject + Risk View
+
+---
+
+## 🚀 Run
 
 ```bash
-# 1. Database
-# Paste database/schema.sql into Supabase SQL Editor and run
-
-# 2. API Server
 cd api-server
 npm install
-node server.js          # → http://localhost:5000
+node server.js
 
-# 3. Plate Detection
-cd plate-service
-pip install flask opencv-python easyocr numpy scikit-learn pandas joblib
-python app.py           # → http://localhost:8000
+cd ../plate-service
+python app.py
+python risk_model.py
 
-# 4. Risk Model
-python risk_model.py    # → http://localhost:8001
-
-# 5. Frontend
 cd ..
 npx serve .
-# → http://localhost:3000/login/login.html
 ```
 
 ---
 
-## 🗺️ Roadmap
+## 🗺 Roadmap
 
-- [ ] Live CCTV stream (replace simulated input)
-- [ ] Twilio live SMS
-- [ ] Online payment gateway
-- [ ] Admin dashboard
-- [ ] Mobile app for field officers
-````
+* [ ] Live CCTV
+* [ ] Real SMS
+* [ ] Payments
+* [ ] Admin panel
+* [ ] Mobile app
+
+---
+
