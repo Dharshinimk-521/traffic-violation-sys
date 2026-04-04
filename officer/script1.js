@@ -3,9 +3,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ============================================================
-// AUTH GUARD — redirect to login if not authenticated
-// ============================================================
+
 let currentUser = null;
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
@@ -15,7 +13,6 @@ let currentUser = null;
 })();
 
 
-// ============================================================
 let allViolations = [];      // fetched from Supabase violation_details view
 let allVehicles = [];        // fetched from Supabase vehicles table
 let currentFilter = 'all';
