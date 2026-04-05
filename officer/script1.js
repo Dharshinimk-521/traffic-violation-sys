@@ -31,9 +31,7 @@ const VIOLATION_ICONS = {
   'Using Phone While Driving': '📱'
 };
 
-// ============================================================
-// INIT — fetch everything from Supabase
-// ============================================================
+// fetching the records form supabase
 async function initDashboard() {
   // Set user info from sessionStorage (set during login)
   const userName = sessionStorage.getItem('tg_name') || 'Officer';
@@ -46,9 +44,9 @@ async function initDashboard() {
   checkHighRiskAlerts();
 }
 
-// ============================================================
-// FETCH VIOLATIONS from Supabase violation_details view
-// ============================================================
+
+// fetches violations from Supabase violation_details view
+
 async function fetchViolations() {
   const { data, error } = await sb
     .from('violation_details')
@@ -61,9 +59,7 @@ async function fetchViolations() {
   updateStats();
 }
 
-// ============================================================
-// FETCH VEHICLES (for risk scores) from Supabase
-// ============================================================
+// fetches vehicles for risk_socre from supabase
 async function fetchVehicles() {
   const { data, error } = await sb
     .from('vehicles')
@@ -75,9 +71,7 @@ async function fetchVehicles() {
   renderRiskCards('all');
 }
 
-// ============================================================
-// RENDER VIOLATIONS TABLE
-// ============================================================
+
 function renderViolations() {
   const tbody = document.getElementById('violations-tbody');
   let rows = allViolations.filter(v => {
@@ -121,9 +115,7 @@ function renderViolations() {
   }).join('');
 }
 
-// ============================================================
-// STATS
-// ============================================================
+// update stats - pending or approved type shi
 function updateStats() {
   const pending  = allViolations.filter(v => v.status === 'pending').length;
   const approved = allViolations.filter(v => v.status === 'approved').length;
@@ -135,9 +127,7 @@ function updateStats() {
   document.getElementById('pending-count').textContent = pending;
 }
 
-// ============================================================
-// APPROVE VIOLATION — calls Node.js API → updates Supabase
-// ============================================================
+// approve violation : call node.js API -> updates supabase
 async function approveViolation(recordId) {
   try {
     const res = await fetch('http://localhost:5000/approve-violation', {
@@ -154,7 +144,7 @@ async function approveViolation(recordId) {
     await fetchVehicles();
     checkHighRiskAlerts();
 
-    // Show individual warning if this driver is now high risk
+    // show individual warning if this driver is now high risk
     if (result.risk_category === 'High') {
       const vehicle = allVehicles.find(v => v.plate_number);
       if (vehicle) setTimeout(() => showWarningModal(vehicle), 700);
@@ -164,9 +154,7 @@ async function approveViolation(recordId) {
   }
 }
 
-// ============================================================
-// REJECT VIOLATION — calls Node.js API → updates Supabase
-// ============================================================
+// reject violation : node.js api call -> then update supabase type shi
 async function rejectViolation(recordId) {
   try {
     const res = await fetch('http://localhost:5000/reject-violation', {
@@ -186,9 +174,7 @@ async function rejectViolation(recordId) {
   }
 }
 
-// ============================================================
-// DETAIL MODAL
-// ============================================================
+// openmodal : the whole table format with all the details
 function openModal(recordId) {
   const v = allViolations.find(x => x.record_id === recordId);
   if (!v) return;
@@ -203,9 +189,9 @@ function openModal(recordId) {
     <div class="modal-row"><span class="modal-key">Phone</span><span class="modal-val">${v.phone_number}</span></div>
     <div class="modal-row"><span class="modal-key">Violation</span><span class="modal-val"><span class="violation-tag ${vClass}">${v.violation_name}</span></span></div>
     <div class="modal-row"><span class="modal-key">Fine Amount</span><span class="modal-val fine-amt">₹${(v.fine_amount||0).toLocaleString()}</span></div>
-    <div class="modal-row"><span class="modal-key">AI Detected</span><span class="modal-val">${v.detected_by_ai ? '✅ Yes' : '⚙ Manual Entry'}</span></div>
+    <div class="modal-row"><span class="modal-key">AI Detected</span><span class="modal-val">${v.detected_by_ai ? ' Yes' : '⚙ Manual Entry'}</span></div>
     <div class="modal-row"><span class="modal-key">Severity</span><span class="modal-val">${'★'.repeat(v.severity_weight||0)}${'☆'.repeat(5-(v.severity_weight||0))}</span></div>
-    <div class="modal-row"><span class="modal-key">Payment</span><span class="modal-val">${v.payment_status === 'paid' ? '✅ Paid' : '⏳ Unpaid'}</span></div>
+    <div class="modal-row"><span class="modal-key">Payment</span><span class="modal-val">${v.payment_status === 'paid' ? ' Paid' : ' Unpaid'}</span></div>
     <div class="modal-row"><span class="modal-key">Current Status</span><span class="modal-val"><span class="status-pill s-${v.status}">${capitalize(v.status)}</span></span></div>
   `;
   document.getElementById('modal-actions').innerHTML = v.status === 'pending' ? `
@@ -216,9 +202,7 @@ function openModal(recordId) {
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
-// ============================================================
-// RISK CARDS — from Supabase vehicles table
-// ============================================================
+// risk cards : uses details from supabase risk_score table
 function renderRiskCards(riskFilter) {
   const grid = document.getElementById('risk-grid');
   let vehicles = allVehicles.filter(v => v.total_violations > 0);
@@ -258,9 +242,7 @@ function filterRisk(cat, btn) {
   renderRiskCards(cat);
 }
 
-// ============================================================
-// HIGH RISK ALERTS BUTTON
-// ============================================================
+// feature : high risk alert button : top right to check that high risky ahh driver
 function checkHighRiskAlerts() {
   highRiskDrivers = allVehicles.filter(v => v.risk_category === 'High');
   const btn = document.getElementById('alerts-btn');
@@ -273,9 +255,7 @@ function checkHighRiskAlerts() {
   }
 }
 
-// ============================================================
-// ALERTS MODAL — list of all high risk drivers
-// ============================================================
+//alert modal: the one that displays the risky drivers details inside that card
 function openAlertsModal() {
   const list = document.getElementById('alerts-list');
   if (!highRiskDrivers.length) {
@@ -313,9 +293,7 @@ function openAlertsModal() {
 }
 function closeAlertsModal() { document.getElementById('alerts-modal-overlay').classList.remove('open'); }
 
-// ============================================================
-// SINGLE DRIVER WARNING MODAL
-// ============================================================
+// shoes the single driver warding msg
 function showWarningModal(vehicle) {
   if (typeof vehicle === 'string') vehicle = JSON.parse(vehicle);
   const pct = Math.min(Math.round(((vehicle.risk_score||0) / 30) * 100), 100);
@@ -334,9 +312,7 @@ function showWarningModal(vehicle) {
 }
 function closeWarningModal() { document.getElementById('warning-modal-overlay').classList.remove('open'); }
 
-// ============================================================
-// SECTION SWITCHER
-// ============================================================
+// section switcher : basically the toggle menu on the left :)
 function showSection(section, el) {
   document.getElementById('violations-section').style.display = section === 'violations' ? 'block' : 'none';
   document.getElementById('risk-section').style.display = section === 'risk' ? 'block' : 'none';
@@ -345,9 +321,7 @@ function showSection(section, el) {
   if (el) el.classList.add('active');
 }
 
-// ============================================================
-// FILTER HELPERS
-// ============================================================
+//filter the risks
 function filterStatus(status, btn) {
   currentFilter = status;
   document.querySelectorAll('#violations-section .filter-btn').forEach(b => b.classList.remove('active'));
@@ -356,9 +330,7 @@ function filterStatus(status, btn) {
 }
 function filterTable(val) { currentSearch = val; renderViolations(); }
 
-// ============================================================
-// REPORT DOWNLOAD
-// ============================================================
+// downaload report section
 function downloadReport() {
   const approved = allViolations.filter(v => v.status === 'approved');
   const content = `
@@ -391,18 +363,14 @@ ${allVehicles.map(v => `  ${v.plate_number} (${v.owner_name}): Score ${v.risk_sc
   showToast('📄 Report downloaded.', false);
 }
 
-// ============================================================
-// LOGOUT
-// ============================================================
+// logout button function
 async function logout() {
   await sb.auth.signOut();
   sessionStorage.clear();
   window.location.href = '../login/login.html';
 }
 
-// ============================================================
-// UTILITIES
-// ============================================================
+//utilities
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -417,7 +385,7 @@ function updateClock() {
 }
 setInterval(updateClock, 1000); updateClock();
 
-// Modal backdrop close
+//modal backdrop close
 document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
 document.getElementById('alerts-modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeAlertsModal(); });
 document.getElementById('warning-modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeWarningModal(); });

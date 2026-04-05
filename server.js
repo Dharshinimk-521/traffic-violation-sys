@@ -1,7 +1,4 @@
-// ============================================
-// TrafficGuard API Server
-// Vanilla Node.js — Port 5000
-// ============================================
+
 
 // Load env
 require('dotenv').config();
@@ -25,9 +22,7 @@ function calculateRisk(totalSeverity, totalViolations) {
   return { score, category };
 }
 
-// ============================================
-// CORS + JSON helpers
-// ============================================
+//json helpers
 function setCORSHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -50,9 +45,7 @@ function parseBody(req) {
   });
 }
 
-// ============================================
-// ROUTE HANDLERS
-// ============================================
+
 
 // GET /health
 async function healthCheck(req, res) {
@@ -303,9 +296,7 @@ async function getRiskScores(req, res) {
   sendJSON(res, 200, { drivers: data });
 }
 
-// ============================================
-// SMS SIMULATION
-// ============================================
+//sms part
 function buildFineMessage(record, riskCategory) {
   return `[TrafficGuard] Dear ${record.vehicles.owner_name}, a traffic violation (${record.violations_master.violation_name}) has been recorded against your vehicle ${record.vehicles.plate_number}. Fine: Rs.${record.fine_amount}. Your current risk level: ${riskCategory}. Pay within 30 days to avoid legal action.`;
 }
@@ -345,9 +336,7 @@ async function simulateSMS(record, riskScore, riskCategory) {
   return { success: true };
 }
 
-// ============================================
-// ROUTER
-// ============================================
+//routes
 const ROUTES = {
   'GET /health': healthCheck,
   'GET /violations': getViolations,

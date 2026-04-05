@@ -1,9 +1,4 @@
 """
-TrafficGuard — Risk Score Prediction Model
-Uses GluonTS / scikit-learn for behavioral analytics
-Downloads to local PC and serves predictions
-
-WHAT IT DOES:
   - Trains a Random Forest classifier on violation patterns
   - Predicts risk category (Low/Medium/High) and score
   - Exposes /predict endpoint for the Node.js backend to call
@@ -24,10 +19,7 @@ app = Flask(__name__)
 MODEL_PATH = 'risk_model.pkl'
 SCORE_MODEL_PATH = 'score_model.pkl'
 
-# ============================================
-# VIOLATION CONFIG
-# Matches your violations_master table
-# ============================================
+
 VIOLATIONS = {
     1: {'name': 'No Helmet',               'fine': 1000, 'severity': 2},
     2: {'name': 'Red Light Jump',           'fine': 5000, 'severity': 5},
@@ -35,9 +27,7 @@ VIOLATIONS = {
     4: {'name': 'Using Phone While Driving','fine': 5000, 'severity': 4},
 }
 
-# ============================================
-# FEATURE ENGINEERING
-# ============================================
+
 def build_features(driver_record: dict) -> np.ndarray:
     """
     Convert driver violation history into ML features.
@@ -79,9 +69,7 @@ def build_features(driver_record: dict) -> np.ndarray:
     return features.reshape(1, -1)
 
 
-# ============================================
-# SYNTHETIC TRAINING DATA GENERATOR
-# ============================================
+#training data generation - 2000 samples randomly generated
 def generate_training_data(n_samples=2000):
     """Generate realistic synthetic driver records for training."""
     np.random.seed(42)
@@ -145,9 +133,7 @@ def generate_training_data(n_samples=2000):
     return pd.DataFrame(records)
 
 
-# ============================================
-# MODEL TRAINING
-# ============================================
+# train the model
 def train_model():
     
     df = generate_training_data(2000)
@@ -185,9 +171,7 @@ def train_model():
     return clf, le, reg, feature_cols
 
 
-# ============================================
-# PREDICTION
-# ============================================
+#predict the o/p the risk score
 def predict(driver_record: dict):
     """Make a risk prediction for a driver."""
     try:
@@ -226,9 +210,7 @@ def predict(driver_record: dict):
         }
 
 
-# ============================================
-# FLASK API
-# ============================================
+#flask api
 @app.route('/health', methods=['GET'])
 def health():
     model_ready = os.path.exists(MODEL_PATH)

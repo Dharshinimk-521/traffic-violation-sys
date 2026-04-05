@@ -3,10 +3,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ============================================================
-// LOGIN — uses Supabase Auth (email + password)
-// After login, checks user_roles table for role, then redirects
-// ============================================================
+//login part : checks the supabase user_roles table and then redirects after authentication
 async function handleLogin() {
 const email = document.getElementById('email').value.trim();
 const password = document.getElementById('password').value.trim();
@@ -58,9 +55,7 @@ try {
 }
 }
 
-// ============================================================
-// FORGOT PASSWORD — Supabase sends reset email automatically
-// ============================================================
+//if forgot password then supabase resends the mail 
 async function sendResetEmail() {
 const email = document.getElementById('reset-email').value.trim();
 const err = document.getElementById('reset-error');
